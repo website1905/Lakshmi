@@ -1,0 +1,394 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday Lakshmi! 🌸</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Nunito:wght@600&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body, html { 
+            width: 100%; height: 100%; 
+            font-family: 'Fredoka', sans-serif; 
+            overflow: hidden; 
+        }
+        
+        /* Cute Background with Pastel Fallback */
+        #background {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%); /* Cute pastel fallback */
+            background-image: url('bg.png');
+            background-size: cover;
+            background-position: center;
+            z-index: -1;
+            transition: filter 1.5s ease;
+        }
+
+        .screen {
+            display: none;
+            width: 100%; height: 100%;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            top: 0; left: 0;
+            text-align: center;
+        }
+
+        .active { display: flex; animation: fadeIn 0.8s ease-in-out; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        /* Cute Start Button */
+        #btn-start {
+            padding: 18px 40px; font-size: 24px; cursor: pointer;
+            background: #ff9ff3; color: white; border: none; border-radius: 50px;
+            box-shadow: 0 8px 20px rgba(255, 159, 243, 0.5);
+            font-family: 'Fredoka', sans-serif;
+            transition: all 0.3s;
+            animation: bounce 2s infinite;
+        }
+        #btn-start:hover { transform: scale(1.05); background: #f368e0; }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-15px); }
+            60% { transform: translateY(-7px); }
+        }
+
+        /* Game Screen */
+        h1 { color: #fff; text-shadow: 2px 2px 8px rgba(0,0,0,0.2); margin-bottom: 25px; font-size: 28px; }
+        .grid {
+            display: grid; grid-template-columns: repeat(3, 100px); gap: 15px;
+            margin-bottom: 25px;
+        }
+        .card {
+            width: 100px; height: 100px; background: #fff;
+            border-radius: 15px; cursor: pointer;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+            transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.4, 0.2, 0.2, 1);
+            border: 3px solid #ff9ff3;
+        }
+        .card img { width: 85%; height: 85%; object-fit: contain; display: none; border-radius: 10px; }
+        .card.flipped img { display: block; }
+        .card.flipped { transform: rotateY(180deg); background: #c8d6e5; border-color: #54a0ff; }
+        .card.matched { visibility: hidden; opacity: 0; transition: visibility 0s 0.5s, opacity 0.5s; }
+
+        #next-btn {
+            display: none; padding: 12px 25px; font-size: 20px;
+            background: #48dbfb; color: white; border: none; border-radius: 30px;
+            cursor: pointer; box-shadow: 0 5px 15px rgba(72, 219, 251, 0.4);
+            font-family: 'Fredoka', sans-serif;
+        }
+        #next-btn:hover { background: #0abde3; }
+
+        /* Locker Screen */
+        .locker-container {
+            background: rgba(255, 255, 255, 0.95); padding: 40px;
+            border-radius: 30px; text-align: center; max-width: 320px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            border: 4px dashed #ff9ff3;
+        }
+        .locker-icon { font-size: 70px; margin-bottom: 10px; }
+        .locker-container h3 { color: #ff6b6b; font-size: 24px; margin-bottom: 5px; }
+        input[type="password"] {
+            padding: 12px; font-size: 22px; width: 100%; text-align: center;
+            margin-bottom: 20px; border-radius: 15px; border: 2px solid #c8d6e5;
+            color: #5f27cd; font-family: 'Nunito', sans-serif; outline: none;
+        }
+        input[type="password"]:focus { border-color: #ff9ff3; }
+        
+        .btn {
+            padding: 12px 20px; font-size: 18px; border: none; border-radius: 15px;
+            cursor: pointer; margin: 5px; font-family: 'Fredoka', sans-serif;
+            transition: transform 0.2s;
+        }
+        .btn:hover { transform: scale(1.05); }
+        .btn-unlock { background: #1dd1a1; color: white; box-shadow: 0 4px 10px rgba(29, 209, 161, 0.4); }
+        .btn-hint { background: #feca57; color: white; box-shadow: 0 4px 10px rgba(254, 202, 87, 0.4); }
+        
+        #hint-modal {
+            display: none; position: fixed; top: 50%; left: 50%;
+            transform: translate(-50%, -50%); background: white;
+            padding: 25px; border-radius: 25px; z-index: 100;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3); border: 3px solid #ff9ff3;
+            text-align: center;
+        }
+        #hint-modal img { max-width: 220px; display: block; margin-bottom: 15px; border-radius: 15px; }
+        
+        /* Scroll Screen */
+        .scroll {
+            background: #fff9e6; width: 85%; max-width: 400px;
+            padding: 40px 30px; border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+            color: #574b90; line-height: 1.6; font-size: 20px;
+            position: relative; font-family: 'Nunito', sans-serif;
+            border: 3px solid #f8a5c2;
+        }
+        .scroll h2 { color: #e77f67; margin-bottom: 15px; font-family: 'Fredoka', sans-serif; font-size: 28px; }
+        .scroll-btn { margin-top: 25px; background: #a29bfe; color: white; border-radius: 25px; }
+
+        /* Scratch Card Screen */
+        .scratch-container {
+            position: relative; width: 300px; height: 300px;
+            border-radius: 20px; overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            border: 5px solid #fff;
+        }
+        .scratch-container img {
+            width: 100%; height: 100%; object-fit: cover; position: absolute;
+            top: 0; left: 0; z-index: 1;
+        }
+        canvas {
+            position: absolute; top: 0; left: 0; z-index: 2; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="background"></div>
+
+    <audio id="bgmusic" loop><source src="bgmusic.mp3" type="audio/mpeg"></audio>
+    <audio id="song1" loop><source src="song1.mp3" type="audio/mpeg"></audio>
+
+    <!-- Screen 0: Start -->
+    <div id="screen-start" class="screen active">
+        <button id="btn-start" onclick="startGame()">Start Lakshmi's Surprise 🎀</button>
+    </div>
+
+    <!-- Screen 1: Memory Game -->
+    <div id="screen-game" class="screen">
+        <h1>✨ Our Friendship Match ✨</h1>
+        <div class="grid" id="game-grid"></div>
+        <button id="next-btn" onclick="showLocker()">Wanna know more? 💖</button>
+    </div>
+
+    <!-- Screen 2: Locker -->
+    <div id="screen-locker" class="screen">
+        <div class="locker-container">
+            <div class="locker-icon">🧸</div>
+            <h3>Cute Lil' Locker</h3>
+            <p style="font-size: 16px; margin-bottom:15px; color:#778beb; font-family:'Nunito'">Unlock for the next surprise!</p>
+            <input type="password" id="locker-pass" placeholder="Password">
+            <div>
+                <button class="btn btn-unlock" onclick="checkPassword()">Unlock 🔓</button>
+                <button class="btn btn-hint" onclick="toggleHint(true)">Hint 💭</button>
+            </div>
+            <p id="error-msg" style="color: #e66767; display: none; margin-top: 15px; font-weight:bold;">Oops! Wrong password 🙈</p>
+        </div>
+    </div>
+
+    <!-- Hint Modal -->
+    <div id="hint-modal">
+        <img src="thought.png" alt="Hint Image">
+        <p style="color: #f78fb3; font-weight: bold; font-size: 18px;">My biharan's birthday!</p>
+        <button class="btn btn-unlock" onclick="toggleHint(false)" style="margin-top:15px; width:100%;">Got it!</button>
+    </div>
+
+    <!-- Screen 3: Scroll -->
+    <div id="screen-scroll" class="screen">
+        <div class="scroll">
+            <h2>Happy Birthday! 🎂</h2>
+            <p>Dear Lakshmi,</p>
+            <p>Wishing you the happiest of birthdays! I wanted to make this to show you that our friendship is truly great and will last a long, long time. 🌸</p>
+            <p style="margin-top: 10px;">Also, I just have to say—your art and drawing skills are absolutely beautiful! Never stop creating. 🎨✨</p>
+            <button class="btn scroll-btn" onclick="showScratch()">One last gift... 🎁</button>
+        </div>
+    </div>
+
+    <!-- Screen 4: Scratch Card -->
+    <div id="screen-scratch" class="screen">
+        <h2 style="color: white; margin-bottom: 20px; text-shadow: 2px 2px 5px rgba(0,0,0,0.3); font-size:30px;">Scratch to Reveal! ✨</h2>
+        <div class="scratch-container">
+            <img src="gift.jpg" alt="Gift">
+            <canvas id="scratch-canvas" width="300" height="300"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Game Assets - USING EXACT FILE NAMES FROM YOUR IMAGE
+        const cards = ['card 1.png', 'card 2.jpg', 'card 3.jpg', 'card 1.png', 'card 2.jpg', 'card 3.jpg'];
+        let hasFlippedCard = false;
+        let lockBoard = false;
+        let firstCard, secondCard;
+        let matchCount = 0;
+
+        function startGame() {
+            document.getElementById('screen-start').classList.remove('active');
+            document.getElementById('screen-game').classList.add('active');
+            document.getElementById('bgmusic').play().catch(e => console.log("Audio play failed:", e));
+            initGame();
+        }
+
+        function initGame() {
+            const grid = document.getElementById('game-grid');
+            grid.innerHTML = '';
+            cards.sort(() => 0.5 - Math.random());
+            cards.forEach(card => {
+                const cardEl = document.createElement('div');
+                cardEl.classList.add('card');
+                cardEl.dataset.name = card;
+                cardEl.innerHTML = `<img src="${card}" alt="card">`;
+                cardEl.addEventListener('click', flipCard);
+                grid.appendChild(cardEl);
+            });
+        }
+
+        function flipCard() {
+            if (lockBoard) return;
+            if (this === firstCard) return;
+
+            this.classList.add('flipped');
+
+            if (!hasFlippedCard) {
+                hasFlippedCard = true;
+                firstCard = this;
+                return;
+            }
+
+            secondCard = this;
+            checkForMatch();
+        }
+
+        function checkForMatch() {
+            let isMatch = firstCard.dataset.name === secondCard.dataset.name;
+            isMatch ? disableCards() : unflipCards();
+        }
+
+        function disableCards() {
+            lockBoard = true;
+            setTimeout(() => {
+                firstCard.classList.add('matched');
+                secondCard.classList.add('matched');
+                resetBoard();
+                matchCount++;
+                if (matchCount === 3) {
+                    document.getElementById('next-btn').style.display = 'inline-block';
+                }
+            }, 800);
+        }
+
+        function unflipCards() {
+            lockBoard = true;
+            setTimeout(() => {
+                firstCard.classList.remove('flipped');
+                secondCard.classList.remove('flipped');
+                resetBoard();
+            }, 1000);
+        }
+
+        function resetBoard() {
+            [hasFlippedCard, lockBoard] = [false, false];
+            [firstCard, secondCard] = [null, null];
+        }
+
+        // Screen Transitions & Locker Logic
+        function showLocker() {
+            document.getElementById('screen-game').classList.remove('active');
+            document.getElementById('screen-locker').classList.add('active');
+        }
+
+        function toggleHint(show) {
+            document.getElementById('hint-modal').style.display = show ? 'block' : 'none';
+        }
+
+        function checkPassword() {
+            const pass = document.getElementById('locker-pass').value;
+            if (pass === '2209') {
+                // Switch music
+                let bgm = document.getElementById('bgmusic');
+                let s1 = document.getElementById('song1');
+                bgm.pause();
+                s1.play().catch(e => console.log("Audio play failed:", e));
+                
+                // Change screens
+                document.getElementById('screen-locker').classList.remove('active');
+                document.getElementById('screen-scroll').classList.add('active');
+                
+                // Blur background for romantic/cute effect
+                document.getElementById('background').style.filter = 'blur(10px) brightness(0.8)';
+            } else {
+                document.getElementById('error-msg').style.display = 'block';
+                setTimeout(() => document.getElementById('error-msg').style.display = 'none', 2500);
+            }
+        }
+
+        function showScratch() {
+            document.getElementById('screen-scroll').classList.remove('active');
+            document.getElementById('screen-scratch').classList.add('active');
+            initScratchCard();
+        }
+
+        // Scratch Card Logic
+        function initScratchCard() {
+            const canvas = document.getElementById('scratch-canvas');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            let isDrawing = false;
+
+            // Fill canvas with a cute silver/pink overlay
+            ctx.fillStyle = '#dcdde1';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Add scratch text
+            ctx.font = 'bold 24px Fredoka';
+            ctx.fillStyle = '#ff7675';
+            ctx.textAlign = 'center';
+            ctx.fillText('Scratch Me! 🪙', canvas.width / 2, canvas.height / 2);
+
+            function getMousePos(e) {
+                const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return {
+                    x: clientX - rect.left,
+                    y: clientY - rect.top
+                };
+            }
+
+            function scratch(e) {
+                if (!isDrawing) return;
+                e.preventDefault();
+                const pos = getMousePos(e);
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.beginPath();
+                ctx.arc(pos.x, pos.y, 30, 0, Math.PI * 2);
+                ctx.fill();
+                checkScratchPercent();
+            }
+
+            canvas.addEventListener('mousedown', (e) => { isDrawing = true; scratch(e); });
+            canvas.addEventListener('mousemove', scratch);
+            canvas.addEventListener('mouseup', () => isDrawing = false);
+            canvas.addEventListener('mouseleave', () => isDrawing = false);
+
+            canvas.addEventListener('touchstart', (e) => { isDrawing = true; scratch(e); }, {passive: false});
+            canvas.addEventListener('touchmove', scratch, {passive: false});
+            canvas.addEventListener('touchend', () => isDrawing = false);
+
+            function checkScratchPercent() {
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                const pixels = imageData.data;
+                let transparentPixels = 0;
+
+                for (let i = 3; i < pixels.length; i += 4) {
+                    if (pixels[i] === 0) transparentPixels++;
+                }
+
+                const totalPixels = pixels.length / 4;
+                const percent = (transparentPixels / totalPixels) * 100;
+
+                // If scratched more than 50%, reveal completely
+                if (percent > 50) {
+                    canvas.style.transition = 'opacity 0.8s ease';
+                    canvas.style.opacity = '0';
+                    setTimeout(() => canvas.style.display = 'none', 800);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
+
